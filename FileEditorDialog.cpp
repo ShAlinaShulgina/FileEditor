@@ -15,7 +15,7 @@ FileEditorDialog::FileEditorDialog(QWidget *parent)
 {}
 
 //------------------------------------------------------------------------------
-FileEditorDialog::FileEditorDialog(const QString &layoutName, const QString &testName, QWidget *parent)
+FileEditorDialog::FileEditorDialog(const QString &firstName, const QString &secondName, QWidget *parent)
    : QDialog(parent)
    , ui(new Ui::FileEditorDialog)
 //------------------------------------------------------------------------------
@@ -38,8 +38,8 @@ FileEditorDialog::FileEditorDialog(const QString &layoutName, const QString &tes
    QSettings settings;
    restoreGeometry(settings.value("Geometry/FileEditorDialog").toByteArray());
 
-   ui->wdgLayoutEditor->editor()->setFileName(layoutName);
-   ui->wdgTestEditor->editor()->setFileName(testName);
+   ui->wdgFirstEditor->editor()->setFileName(firstName);
+   ui->wdgSecondEditor->editor()->setFileName(secondName);
 }
 
 //------------------------------------------------------------------------------
@@ -50,47 +50,47 @@ FileEditorDialog::~FileEditorDialog()
 }
 
 //------------------------------------------------------------------------------
-void FileEditorDialog::setLayoutCursorToLine(int lineNumber)
+void FileEditorDialog::setFirstCursorToLine(int lineNumber)
 //------------------------------------------------------------------------------
 {
-   ui->wdgLayoutEditor->editor()->setCursorToLine(lineNumber);
+   ui->wdgFirstEditor->editor()->setCursorToLine(lineNumber);
 }
 
 //------------------------------------------------------------------------------
-void FileEditorDialog::setTestCursorToLine(int lineNumber)
+void FileEditorDialog::setSecondCursorToLine(int lineNumber)
 //------------------------------------------------------------------------------
 {
-   ui->wdgTestEditor->editor()->setCursorToLine(lineNumber);
+   ui->wdgSecondEditor->editor()->setCursorToLine(lineNumber);
 }
 
 //------------------------------------------------------------------------------
-void FileEditorDialog::updateLayoutFileName(const QString &name)
+void FileEditorDialog::updateFirstFileName(const QString &name)
 //------------------------------------------------------------------------------
 {
-   ui->wdgLayoutEditor->editor()->setFileName(name);
+   ui->wdgFirstEditor->editor()->setFileName(name);
 }
 
 //------------------------------------------------------------------------------
-void FileEditorDialog::updateTestFileName(const QString &name)
+void FileEditorDialog::updateSecondFileName(const QString &name)
 //------------------------------------------------------------------------------
 {
-   ui->wdgTestEditor->editor()->setFileName(name);
+   ui->wdgSecondEditor->editor()->setFileName(name);
 }
 
 //------------------------------------------------------------------------------
-void FileEditorDialog::infoReloadLayout()
+void FileEditorDialog::infoReloadFirst()
 //------------------------------------------------------------------------------
 {
-   QMessageBox::information(this, tr("Information"), tr("Need to reload layout file"));
-   emit reloadLayoutFile();
+   // QMessageBox::information(this, tr("Information"), tr("Need to reload first file"));
+   emit reloadFirstFile();
 }
 
 //------------------------------------------------------------------------------
-void FileEditorDialog::infoReloadTest()
+void FileEditorDialog::infoReloadSecond()
 //------------------------------------------------------------------------------
 {
-   QMessageBox::information(this, tr("Information"), tr("Need to reload test file"));
-   emit reloadTestFile();
+   // QMessageBox::information(this, tr("Information"), tr("Need to reload second file"));
+   emit reloadSecondFile();
 }
 
 //------------------------------------------------------------------------------
@@ -99,20 +99,20 @@ bool FileEditorDialog::save(std::function<bool(CodeEditor *)> &func, bool noRelo
 {
    bool res = false;
    auto focus = focusWidget();
-   if (focus == ui->wdgLayoutEditor->editor())
+   if (focus == ui->wdgFirstEditor->editor())
    {
-      res = func(ui->wdgLayoutEditor->editor());
+      res = func(ui->wdgFirstEditor->editor());
       if (!noReload && res)
       {
-         infoReloadLayout();
+         infoReloadFirst();
       }
    }
-   else if (focus == ui->wdgTestEditor->editor())
+   else if (focus == ui->wdgSecondEditor->editor())
    {
-      res = func(ui->wdgTestEditor->editor());
+      res = func(ui->wdgSecondEditor->editor());
       if (!noReload && res)
       {
-         infoReloadTest();
+         infoReloadSecond();
       }
    }
    return res;
@@ -122,13 +122,13 @@ bool FileEditorDialog::save(std::function<bool(CodeEditor *)> &func, bool noRelo
 void FileEditorDialog::closeEvent(QCloseEvent *event)
 //------------------------------------------------------------------------------
 {
-   if (ui->wdgLayoutEditor->editor()->saveFile())
+   if (ui->wdgFirstEditor->editor()->saveFile())
    {
-      infoReloadLayout();
+      infoReloadFirst();
    }
-   if (ui->wdgTestEditor->editor()->saveFile())
+   if (ui->wdgSecondEditor->editor()->saveFile())
    {
-      infoReloadTest();
+      infoReloadSecond();
    }
 
    QSettings settings;
@@ -142,19 +142,19 @@ void FileEditorDialog::open()
 {
    CodeEditor *widget = nullptr;
    auto focus = focusWidget();
-   if (focus == ui->wdgLayoutEditor->editor())
+   if (focus == ui->wdgFirstEditor->editor())
    {
-      widget = ui->wdgLayoutEditor->editor();
+      widget = ui->wdgFirstEditor->editor();
    }
-   else if (focus == ui->wdgTestEditor->editor())
+   else if (focus == ui->wdgSecondEditor->editor())
    {
-      widget = ui->wdgTestEditor->editor();
+      widget = ui->wdgSecondEditor->editor();
    }
    if (!widget)
    {
       return;
    }
-   auto fileName = QFileDialog::getOpenFileName(this, tr("Open file"), ui->wdgTestEditor->editor()->getFileName(), tr("Files: *.txt"));
+   auto fileName = QFileDialog::getOpenFileName(this, tr("Open file"), ui->wdgSecondEditor->editor()->getFileName(), tr("Files: *.txt"));
    if (!fileName.isEmpty())
    {
       widget->setFileName(fileName);

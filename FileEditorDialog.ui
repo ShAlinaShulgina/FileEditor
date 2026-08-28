@@ -19,12 +19,12 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="EditorWidget" name="wdgLayoutEditor" native="true">
+     <widget class="EditorWidget" name="wdgFirstEditor" native="true">
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
      </widget>
-     <widget class="EditorWidget" name="wdgTestEditor" native="true">
+     <widget class="EditorWidget" name="wdgSecondEditor" native="true">
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>

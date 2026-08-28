@@ -20,20 +20,20 @@ class FileEditorDialog : public QDialog
 
 public:
    explicit FileEditorDialog(QWidget *parent = nullptr);
-   explicit FileEditorDialog(const QString &layoutName, const QString &testName, QWidget *parent = nullptr);
+   explicit FileEditorDialog(const QString &firstName, const QString &secondName, QWidget *parent = nullptr);
    ~FileEditorDialog() override;
 
-   void setLayoutCursorToLine(int lineNumber);
-   void setTestCursorToLine(int lineNumber);
+   void setFirstCursorToLine(int lineNumber);
+   void setSecondCursorToLine(int lineNumber);
 
-   void updateLayoutFileName(const QString &name);
-   void updateTestFileName(const QString &name);
+   void updateFirstFileName(const QString &name);
+   void updateSecondFileName(const QString &name);
 
 private:
    Ui::FileEditorDialog *ui;
 
-   void infoReloadLayout();
-   void infoReloadTest();
+   void infoReloadFirst();
+   void infoReloadSecond();
 
    bool save(std::function<bool(CodeEditor *editor)> &func, bool noReload = false);
 
@@ -46,7 +46,7 @@ private slots:
    bool onSaveAs();
 
 signals:
-   void reloadLayoutFile();
-   void reloadTestFile();
+   void reloadFirstFile();
+   void reloadSecondFile();
 };
 #endif // FILEEDITORDIALOG_H
