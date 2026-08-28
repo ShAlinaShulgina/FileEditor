@@ -3,13 +3,14 @@
 #include "LineNumberArea.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QDir>
+#include <QFileSystemWatcher>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPainter>
 #include <QSaveFile>
 #include <QTextBlock>
+#include <QTimer>
 
 //------------------------------------------------------------------------------
 CodeEditor::CodeEditor(QWidget *parent)
@@ -21,9 +22,15 @@ CodeEditor::CodeEditor(QWidget *parent)
 CodeEditor::CodeEditor(const QString &fileName, QWidget *parent)
    : QPlainTextEdit(parent)
    , m_fileName{ fileName }
+   , m_watcher(new QFileSystemWatcher())
 //------------------------------------------------------------------------------
 {
    m_lineNumberArea = new LineNumberArea(this);
+   
+   if (!m_fileName.isEmpty())
+   {
+      m_watcher->addPath(m_fileName);
+   }
 
    setLineWrapMode(QPlainTextEdit::NoWrap);
 
@@ -37,7 +44,18 @@ CodeEditor::CodeEditor(const QString &fileName, QWidget *parent)
    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
 
+   connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &CodeEditor::handleFileChanged);
+   m_fileTimer = new QTimer(this);
+   connect(m_fileTimer, &QTimer::timeout, this, &CodeEditor::doFileChanged);
+   
    updateLineNumberAreaWidth(0);
+}
+
+//------------------------------------------------------------------------------
+CodeEditor::~CodeEditor()
+//------------------------------------------------------------------------------
+{
+   delete m_watcher;
 }
 
 //------------------------------------------------------------------------------
@@ -73,7 +91,16 @@ void CodeEditor::setCursorToLine(int number)
 void CodeEditor::setFileName(const QString &name)
 //------------------------------------------------------------------------------
 {
+   if (!m_fileName.isEmpty())
+   {
+      m_watcher->removePath(m_fileName);
+   }
    m_fileName = name;
+   
+   if (!m_fileName.isEmpty())
+   {
+      m_watcher->addPath(m_fileName);
+   }
    emit setFile(m_fileName);
    saveFile();
    openFile();
@@ -180,7 +207,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 //------------------------------------------------------------------------------
 void CodeEditor::openFile()
 //------------------------------------------------------------------------------
-{
+{         
    if (m_fileName.isEmpty())
    {
       return;
@@ -188,6 +215,9 @@ void CodeEditor::openFile()
    QFile file(m_fileName);
    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
    {
+      document()->setModified(false);
+      document()->clearUndoRedoStacks();
+
       QTextStream in(&file);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       in.setCodec("UTF-8");
@@ -210,7 +240,6 @@ bool CodeEditor::saveFile()
    bool res = false;
    if (document()->isModified())
    {
-      qDebug() << __func__ << m_fileName;
       auto btn = QMessageBox::question(this, tr("The file has been changed"), tr("Do you want to save changes?"),
                                        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
       if (btn == QMessageBox::Yes)
@@ -223,7 +252,6 @@ bool CodeEditor::saveFile()
          QString format("%1_%2.%3");
          QFileInfo info(m_fileName);
          QString newName = format.arg(QDir(info.absolutePath()).filePath(info.completeBaseName()), dt, info.suffix());
-         qDebug() << newName;
          if (!QFile::copy(m_fileName, newName))
          {
             auto warningBtn = QMessageBox::warning(this, tr("Save backup file"),
@@ -235,6 +263,7 @@ bool CodeEditor::saveFile()
             }
          }
          // saveFile
+         m_watcher->removePath(m_fileName);
          QSaveFile file(m_fileName);
          if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
          {
@@ -248,6 +277,7 @@ bool CodeEditor::saveFile()
             if (file.commit())
             {
                res = true;
+               m_watcher->addPath(m_fileName);
                document()->setModified(false);
                document()->clearUndoRedoStacks();
             }
@@ -260,8 +290,6 @@ bool CodeEditor::saveFile()
       else
       {
          openFile();
-         document()->setModified(false);
-         document()->clearUndoRedoStacks();
       }
    }
    return res;
@@ -286,6 +314,9 @@ bool CodeEditor::saveFileAs(const QString &fileName)
       if (file.commit())
       {
          res = true;
+         document()->setModified(false);
+         document()->clearUndoRedoStacks();
+         setFileName(fileName);
       }
    }
    else
@@ -293,4 +324,45 @@ bool CodeEditor::saveFileAs(const QString &fileName)
       QMessageBox::warning(this, tr("Save as file"), QString(tr("Error open file: %1")).arg(file.errorString()));
    }
    return res;
+}
+
+//------------------------------------------------------------------------------
+void CodeEditor::handleFileChanged(const QString &path)
+//------------------------------------------------------------------------------
+{
+   m_fileTimer->start(200);
+}
+
+void CodeEditor::doFileChanged()
+{
+   m_fileTimer->stop();
+
+   if (!QFileInfo::exists(m_fileName))
+   {
+      auto answer = QMessageBox::question(this, tr("File has been modified outside"), tr("Do you want to save file?"));
+      if (answer == QMessageBox::Yes)
+      {
+         saveFileAs(m_fileName);
+         m_watcher->addPath(m_fileName);
+      }
+      else
+      {
+         document()->clear();
+         document()->setModified(false);
+         document()->clearUndoRedoStacks();
+         setFileName("");
+      }
+   }
+   else
+   {
+      if (document()->isModified())
+      {
+         auto answer = QMessageBox::question(this, tr("File has been modified outside"), tr("Do you want to save current changes?"));
+         if (answer == QMessageBox::Yes)
+         {
+            saveFileAs(m_fileName);
+         }
+      }
+      openFile();
+   }
 }

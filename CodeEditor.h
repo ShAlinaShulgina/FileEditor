@@ -3,13 +3,17 @@
 
 #include <QPlainTextEdit>
 
+class QFileSystemWatcher;
+class QTimer;
+
 class CodeEditor : public QPlainTextEdit
 {
    Q_OBJECT
 
 public:
    explicit CodeEditor(QWidget *parent = nullptr);
-   CodeEditor(const QString &fileName, QWidget *parent = nullptr);
+   explicit CodeEditor(const QString &fileName, QWidget *parent = nullptr);
+   ~CodeEditor();
 
    void lineNumberAreaPaintEvent(QPaintEvent *event);
    int lineNumberAreaWidth();
@@ -28,6 +32,8 @@ protected:
 private:
    QWidget *m_lineNumberArea;
    QString m_fileName;
+   QFileSystemWatcher *m_watcher;
+   QTimer *m_fileTimer = nullptr;
 
    void openFile();
 
@@ -35,6 +41,8 @@ private slots:
    void updateLineNumberAreaWidth(int newBlockCount);
    void updateLineNumberArea(const QRect &rect, int dy);
    void highlightCurrentLine();
+   void handleFileChanged(const QString &path);
+   void doFileChanged();
 
 signals:
    void setFile(const QString &str);
