@@ -2,8 +2,6 @@
 
 #include "CodeEditor.h"
 
-#include <QTextStream>
-
 //------------------------------------------------------------------------------
 LineNumberArea::LineNumberArea(CodeEditor *editor)
    : QWidget(editor)

@@ -1,5 +1,4 @@
-#ifndef CODEEDITOR_H
-#define CODEEDITOR_H
+#pragma once
 
 #include <QPlainTextEdit>
 
@@ -49,5 +48,3 @@ private slots:
 signals:
    void setFile(const QString &str);
 };
-
-#endif // CODEEDITOR_H
