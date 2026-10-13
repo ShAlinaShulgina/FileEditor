@@ -1,5 +1,4 @@
-#ifndef EDITORWIDGET_H
-#define EDITORWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -22,5 +21,3 @@ private:
 private slots:
    void updateModifiedMark(bool modified);
 };
-
-#endif // EDITORWIDGET_H

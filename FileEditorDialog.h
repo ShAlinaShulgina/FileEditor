@@ -1,5 +1,4 @@
-#ifndef FILEEDITORDIALOG_H
-#define FILEEDITORDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -49,4 +48,3 @@ signals:
    void reloadFirstFile();
    void reloadSecondFile();
 };
-#endif // FILEEDITORDIALOG_H

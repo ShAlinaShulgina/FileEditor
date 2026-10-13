@@ -1,5 +1,4 @@
-#ifndef LINENUMBERAREA_H
-#define LINENUMBERAREA_H
+#pragma once
 
 #include <QWidget>
 
@@ -18,5 +17,3 @@ protected:
 private:
    CodeEditor *m_browser;
 };
-
-#endif // LINENUMBERAREA_H
