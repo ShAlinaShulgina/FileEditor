@@ -36,6 +36,8 @@ set(SOURCES
     EditorWidget.cpp
     LineNumberArea.cpp
     CodeEditor.cpp
+    SearchPanel.cpp
+    LineEditButtons.cpp
 )
 
 set(HEADERS
@@ -43,6 +45,8 @@ set(HEADERS
     EditorWidget.h
     LineNumberArea.h
     CodeEditor.h
+    SearchPanel.h
+    LineEditButtons.h
 )
 
 set(FORMS

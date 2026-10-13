@@ -1,6 +1,7 @@
 #include "CodeEditor.h"
 
 #include "LineNumberArea.h"
+#include "SearchPanel.h"
 
 #include <QDateTime>
 #include <QDir>
@@ -11,6 +12,9 @@
 #include <QSaveFile>
 #include <QTextBlock>
 #include <QTimer>
+
+#include <QShortcut>
+#include <QKeySequence>
 
 //------------------------------------------------------------------------------
 CodeEditor::CodeEditor(QWidget *parent)
@@ -23,6 +27,7 @@ CodeEditor::CodeEditor(const QString &fileName, QWidget *parent)
    : QPlainTextEdit(parent)
    , m_fileName{ fileName }
    , m_watcher(new QFileSystemWatcher())
+   , m_search(new SearchPanel(this))
 //------------------------------------------------------------------------------
 {
    m_lineNumberArea = new LineNumberArea(this);
@@ -49,6 +54,14 @@ CodeEditor::CodeEditor(const QString &fileName, QWidget *parent)
    connect(m_fileTimer, &QTimer::timeout, this, &CodeEditor::doFileChanged);
    
    updateLineNumberAreaWidth(0);
+
+   QShortcut *showSearchPanel = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
+   showSearchPanel->setContext(Qt::WidgetWithChildrenShortcut);
+   connect(showSearchPanel, &QShortcut::activated, m_search, &SearchPanel::showPanel);
+
+   QShortcut *closeSearchPanel = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+   closeSearchPanel->setContext(Qt::WidgetWithChildrenShortcut);
+   connect(closeSearchPanel, &QShortcut::activated, m_search, &SearchPanel::hidePanel);
 }
 
 //------------------------------------------------------------------------------
@@ -147,6 +160,8 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
 
    QRect cr = contentsRect();
    m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+
+   m_search->updatePosition();
 }
 
 //------------------------------------------------------------------------------

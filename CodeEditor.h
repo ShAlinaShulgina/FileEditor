@@ -5,6 +5,7 @@
 
 class QFileSystemWatcher;
 class QTimer;
+class SearchPanel;
 
 class CodeEditor : public QPlainTextEdit
 {
@@ -34,6 +35,7 @@ private:
    QString m_fileName;
    QFileSystemWatcher *m_watcher;
    QTimer *m_fileTimer = nullptr;
+   SearchPanel *m_search;
 
    void openFile();
 
