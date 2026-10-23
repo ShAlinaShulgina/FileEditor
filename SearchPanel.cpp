@@ -29,9 +29,15 @@ SearchPanel::SearchPanel(CodeEditor *parentEditor)
    layout->addWidget(m_searchInput);
 
    m_foundInfo->setText(tr("No results"));
+   m_foundInfo->setReadOnly(true);
    connect(m_searchInput, &QLineEdit::textChanged, [this](const QString &text)
    {
       updateFoundInfo();
+   });
+   connect(m_searchInput, &LineEditButtons::changeMatchChecked, [this]()
+   {
+      updateFoundInfo();
+      findNext();
    });
    layout->addWidget(m_foundInfo);
 
@@ -159,7 +165,7 @@ void SearchPanel::updateFoundInfo()
    }
 
    const int current = currentOccurrenceIndex(text, flags);
-   m_foundInfo->setText(QString("%1 / %2").arg(current).arg(total));
+   m_foundInfo->setText(QString(tr("%1 of %2")).arg(current).arg(total));
 }
 
 void SearchPanel::findNext()

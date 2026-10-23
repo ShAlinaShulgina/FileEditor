@@ -29,6 +29,11 @@ LineEditButtons::LineEditButtons(QWidget *parent)
    QSize sz = m_btnMatchCases->sizeHint();
    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
    setTextMargins(0, 0, sz.width() + frameWidth + 2, 0);
+
+   connect(m_btnMatchCases, &QToolButton::clicked, [this]()
+   {
+      emit changeMatchChecked();
+   });
 }
 
 bool LineEditButtons::isMatchChecked() const

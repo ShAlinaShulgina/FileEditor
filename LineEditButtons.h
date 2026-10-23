@@ -19,4 +19,7 @@ private:
 
 protected:
    void resizeEvent(QResizeEvent* e);
+
+signals:
+   void changeMatchChecked();
 };
